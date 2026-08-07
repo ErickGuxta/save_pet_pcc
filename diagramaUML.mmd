@@ -1,0 +1,140 @@
+classDiagram
+    namespace django_contrib_auth {
+        class User {
+            +AutoField id
+            +CharField username
+            +CharField password
+            +CharField first_name
+            +CharField last_name
+            +EmailField email
+            +BooleanField is_staff
+            +BooleanField is_active
+            +BooleanField is_superuser
+            +DateTimeField last_login
+            +DateTimeField date_joined
+        }
+
+        class Group {
+            +AutoField id
+            +CharField name
+        }
+
+        class Permission {
+            +AutoField id
+            +CharField name
+            +CharField codename
+            +ForeignKey content_type
+        }
+    }
+
+    User "0..n" -- "0..n" Group : groups
+    User "0..n" -- "0..n" Permission : user_permissions
+    Group "0..n" -- "0..n" Permission : permissions
+
+    %% ===================== DOMÍNIO SAVEPET =====================
+    class Usuario {
+        +CharField cpf
+        +CharField telefone
+        +CharField tipo "tutor/administrador"
+        +CharField cep
+        +CharField logradouro
+        +CharField numero
+        +CharField complemento
+        +CharField bairro
+        +CharField cidade
+        +CharField estado
+        +criar()$ Usuario
+        +listar()$ list
+        +atualizar() void
+        +desativar() void
+    }
+    User <|-- Usuario : herda
+
+    class Pet {
+        +AutoField id
+        +CharField nome
+        +CharField especie
+        +CharField raca
+        +CharField sexo
+        +DateField data_nascimento
+        +CharField pelagem
+        +FloatField peso
+        +ImageField foto
+        +TextField alergias
+        +TextField doencas
+        +TextField medicamentos
+        +TextField observacoes
+        +DateTimeField data_atualizacao_saude
+        +ForeignKey usuario_id
+        +criar()$ Pet
+        +listar()$ list
+        +atualizar() void
+        +excluir() void
+    }
+
+    class Registro_Vacina {
+        +AutoField id
+        +ForeignKey pet_id
+        +CharField nome_vacina
+        +CharField lote
+        +DateField data_aplicacao
+        +DateField data_reforco
+        +CharField veterinario
+        +CharField clinica
+        +criar()$ Registro_Vacina
+        +listar()$ list
+        +atualizar() void
+        +excluir() void
+    }
+
+    class Rastreador {
+        +AutoField id
+        +ForeignKey pet_id
+        +CharField identificador
+        +CharField modelo
+        +DateTimeField data_vinculacao
+        +criar()$ Rastreador
+        +listar()$ list
+        +atualizar() void
+        +excluir() void
+    }
+
+    class Localizacao {
+        +AutoField id
+        +ForeignKey rastreador_id
+        +FloatField latitude
+        +FloatField longitude
+        +DateTimeField timestamp
+        +criar()$ Localizacao
+        +listar()$ list
+    }
+    class Categoria {
+        +AutoField id
+        +CharField nome
+        +TextField descricao
+        +criar()$ Categoria
+        +listar()$ list
+        +atualizar() void
+        +excluir() void
+    }
+
+    class Artigo_Blog {
+        +AutoField id
+        +ForeignKey usuario_id
+        +ForeignKey categoria_id
+        +CharField titulo
+        +TextField conteudo
+        +DateTimeField data_publicacao
+        +DateTimeField data_atualizacao
+        +criar()$ Artigo_Blog
+        +listar()$ list
+        +atualizar() void
+        +excluir() void
+    }
+
+    Usuario "1" -- "0..n" Pet : possui
+    Usuario "1" -- "0..n" Artigo_Blog : gerencia
+    Pet "1" -- "0..n" Registro_Vacina : possui
+    Pet "1" -- "0..1" Rastreador : vincula
+    Rastreador "1" -- "0..n" Localizacao : gera
+    Categoria "1" -- "0..n" Artigo_Blog : detem

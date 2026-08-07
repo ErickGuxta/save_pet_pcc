@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - SavePet{% endblock %}
+
+{% block content %}
+<div class="row align-items-center g-4 mb-4">
+    <div class="col-lg-7">
+        <h1 class="h3 mb-2">Inicio do sistema</h1>
+        <p class="text-muted mb-0">
+            Painel inicial generico do SavePet, preparado com base nas entidades Usuario, Pet,
+            Registro de Vacina, Rastreador e Localizacao do diagrama UML.
+        </p>
+    </div>
+    <div class="col-lg-5">
+        <div class="bg-white border rounded-3 p-4">
+            <span class="text-muted small d-block">Usuario logado</span>
+            <strong>{{ user.get_full_name|default:user.username }}</strong>
+            <div class="text-muted small">{{ user.email|default:"E-mail nao informado" }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-3">
+        <a class="card h-100 text-decoration-none text-dark shadow-sm" href="{% url 'accounts:pets' %}">
+            <div class="card-body">
+                <div class="fw-semibold mb-1">Cadastro de pets</div>
+                <p class="text-muted small mb-0">Modelo para inserir e consultar dados do Pet.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <a class="card h-100 text-decoration-none text-dark shadow-sm" href="{% url 'accounts:vaccines' %}">
+            <div class="card-body">
+                <div class="fw-semibold mb-1">Registro de vacinas</div>
+                <p class="text-muted small mb-0">Tela base para historico de aplicacoes e reforcos.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <a class="card h-100 text-decoration-none text-dark shadow-sm" href="{% url 'accounts:locator' %}">
+            <div class="card-body">
+                <div class="fw-semibold mb-1">Localizador</div>
+                <p class="text-muted small mb-0">Estrutura para rastreador e localizacoes.</p>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <a class="card h-100 text-decoration-none text-dark shadow-sm" href="{% url 'accounts:profile' %}">
+            <div class="card-body">
+                <div class="fw-semibold mb-1">Perfil do usuario</div>
+                <p class="text-muted small mb-0">Dados pessoais e endereco do tutor.</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="bg-white border rounded-3 p-4">
+    <h2 class="h5 mb-3">Resumo</h2>
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="border rounded-3 p-3">
+                <span class="text-muted small">Pets</span>
+                <div class="h4 mb-0">0</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="border rounded-3 p-3">
+                <span class="text-muted small">Vacinas</span>
+                <div class="h4 mb-0">0</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="border rounded-3 p-3">
+                <span class="text-muted small">Rastreadores</span>
+                <div class="h4 mb-0">0</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="border rounded-3 p-3">
+                <span class="text-muted small">Alertas</span>
+                <div class="h4 mb-0">0</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
