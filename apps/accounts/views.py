@@ -1,3 +1,14 @@
+# // O app accounts deve cuidar:
+
+#   - cadastro/login/logout de usuários;
+#   - perfil do tutor;
+#   - CRUD administrativo de usuários;
+#   - regras de permissão relacionadas a usuário.
+
+# ============================================================
+# Imports
+# ============================================================
+
 #importando shortcuts para renderização e redirecionamento de URL
 from django.shortcuts import render, get_object_or_404, redirect
 
@@ -11,39 +22,29 @@ from .models import Usuario
 
 User = get_user_model()
 
+# ============================================================
+# Permissões de acesso
+# ============================================================
 
 def is_admin(user):
     return user.is_superuser
 
+# ============================================================
+# Dashboard
+# ============================================================
 
-#Dashboard
 @login_required
 def dashboard(request):
     return render(request, "accounts/dashboard.html")
 
 
-#Redireciona para dashboard
 @login_required
 def index(request):
     return redirect("dashboard")
 
-
-#Listar users
-@login_required
-@user_passes_test(is_admin)
-def users(request):
-
-    users = User.objects.all()
-
-    context = {
-        "users": users,
-    }
-
-    #retorno a request, o caminho template e o contexto
-    return render(request, "accounts/index.html", context)
-
-
-#Criar users -> para admim
+# ============================================================
+# Cadastro público de tutor
+# ============================================================
 def create(request):
     #instanciando a metaclasse UserForm
     form = UserForm()
@@ -71,7 +72,9 @@ def create(request):
     return render(request, "accounts/create.html", context)
 
 
-#Editar perfil usuário
+# ============================================================
+# Perfil do tutor
+# ============================================================
 @login_required
 def profile(request):
     Usuario.objects.get_or_create(user=request.user)
@@ -113,25 +116,25 @@ def profile(request):
     return render(request, "accounts/profile.html", context)
 
 
-#Cadastro de pets
+# ============================================================
+# Administração de usuários
+# ============================================================
+
+#Listar users
 @login_required
-def pets(request):
-    return render(request, "accounts/pets.html")
+@user_passes_test(is_admin)
+def users(request):
 
+    users = User.objects.all()
 
-#Registro de vacinas
-@login_required
-def vaccines(request):
-    return render(request, "accounts/vaccines.html")
+    context = {
+        "users": users,
+    }
 
+    #retorno a request, o caminho template e o contexto
+    return render(request, "accounts/index.html", context)
 
-#Localizador
-@login_required
-def locator(request):
-    return render(request, "accounts/locator.html")
-
-
-#Detalhar users -> para admim
+#detalhar users
 @login_required
 @user_passes_test(is_admin)
 def detail(request, id):
@@ -145,7 +148,7 @@ def detail(request, id):
     return render(request, "accounts/detail.html", context)
 
 
-#Editar users -> para admim
+#Editar users 
 @login_required
 @user_passes_test(is_admin)
 def edit(request, id):
@@ -177,7 +180,7 @@ def edit(request, id):
     return render(request, "accounts/edit.html", context)
 
 
-#Deletar users -> para admim
+#Deletar users 
 @login_required 
 @user_passes_test(is_admin)
 def delete(request, id):

@@ -5,16 +5,19 @@ from . import views
 app_name = "accounts"
 
 urlpatterns = [
-    path("", views.index, name="index"),
-    path("home/",            views.dashboard,      name="dashboard"),
-    path("usuarios/",        views.users,          name="users"),
-    path("create/",          views.create,         name="create"),
-    path("register/",        views.create,         name="register"),
-    path("perfil/",          views.profile,        name="profile"),
-    path("pets/",            views.pets,           name="pets"),
-    path("vacinas/",         views.vaccines,       name="vaccines"),
-    path("localizador/",     views.locator,        name="locator"),
-    path("<int:id>/",        views.detail,         name="detail"),
-    path("<int:id>/edit/",   views.edit,           name="edit"),
-    path("<int:id>/delete/", views.delete,         name="delete"),
-]
+    # Dashboard
+    path("",                          views.index,     name="index"),
+    path("home/",                     views.dashboard, name="dashboard"),
+
+    # Cadastro público
+    path("register/",                 views.register,  name="register"),
+
+    # Perfil do tutor
+    path("perfil/",                   views.profile,   name="profile"),
+
+    # Administração de usuários
+    path("usuarios/",                 views.users,     name="users"),
+    path("usuarios/<int:id>/",        views.detail,    name="detail"),
+    path("usuarios/<int:id>/edit/",   views.edit,      name="edit"),
+    path("usuarios/<int:id>/delete/", views.delete,    name="delete"),
+  ]
