@@ -33,7 +33,7 @@ def create(request):
     form = PetForm()
 
     if request.method == "POST":
-        form = PetForm(request.POST)
+        form = PetForm(request.POST, request.FILES)
 
         if form.is_valid():
             pet = form.save(commit=False)
@@ -41,7 +41,7 @@ def create(request):
 
             pet.save()
             messages.success(request, "Pet cadastrado com sucesso.")
-            return redirect("pets")
+            return redirect("pets:index")
         #se não for válido renderiza a tela de criar novamente
         else:
             context = {
@@ -63,12 +63,12 @@ def edit(request, id):
     form = PetForm(instance=pet)
 
     if request.method == "POST":
-        form = PetForm(request.POST, instance=pet)
+        form = PetForm(request.POST, request.FILES, instance=pet)
 
         if form.is_valid():
             form.save()
             messages.success(request, "Pet atualizado com sucesso.")
-            return redirect("pets")
+            return redirect("pets:index")
         else:
             context = {
                 "form": form
@@ -88,4 +88,4 @@ def delete(request, id):
     pet = get_object_or_404(Pet, id=id, usuario=request.user)
     pet.delete()
     messages.success(request, "Pet excluído com sucesso.")
-    return redirect("pets")
+    return redirect("pets:index")

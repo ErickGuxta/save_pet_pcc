@@ -21,3 +21,14 @@ class PetForm(forms.ModelForm):
             "medicamentos",
             "observacoes",
     ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            field.widget.attrs.update({"class": "form-control"})
+
+        for field_name in ["especie", "sexo"]:
+            self.fields[field_name].widget.attrs.update({"class": "form-select"})
+
+        self.fields["data_nascimento"].widget.input_type = "date"

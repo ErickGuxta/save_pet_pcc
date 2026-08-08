@@ -10,7 +10,10 @@ urlpatterns = [
     path("home/",                     views.dashboard, name="dashboard"),
 
     # Cadastro público
-    path("register/",                 views.register,  name="register"),
+    path("create/",                   views.create,    name="create"),
+    path("register/",                 views.create,    name="register"),
+    path("vacinas/",                  views.vaccines,  name="vaccines"),
+    path("localizador/",              views.locator,   name="locator"),
 
     # Perfil do tutor
     path("perfil/",                   views.profile,   name="profile"),

@@ -42,6 +42,16 @@ def dashboard(request):
 def index(request):
     return redirect("dashboard")
 
+
+@login_required
+def vaccines(request):
+    return render(request, "accounts/vaccines.html")
+
+
+@login_required
+def locator(request):
+    return render(request, "accounts/locator.html")
+
 # ============================================================
 # Cadastro público de tutor
 # ============================================================
@@ -56,7 +66,9 @@ def create(request):
             user = form.save()
             Usuario.objects.get_or_create(user=user)
             login(request, user)
+
             messages.success(request, "Cadastro realizado com sucesso.")
+
             return redirect("dashboard")
         #se não for válido renderiza a tela de criar novamente
         else:

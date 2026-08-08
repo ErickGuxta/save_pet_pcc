@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}{{ pet.nome }} - SavePet{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h4 mb-1">{{ pet.nome }}</h1>
+        <p class="text-muted mb-0">Detalhes do pet.</p>
+    </div>
+    <a href="{% url 'pets:index' %}" class="btn btn-outline-secondary">Voltar</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Especie</dt>
+            <dd class="col-sm-9">{{ pet.especie }}</dd>
+
+            <dt class="col-sm-3">Raca</dt>
+            <dd class="col-sm-9">{{ pet.raca }}</dd>
+
+            <dt class="col-sm-3">Sexo</dt>
+            <dd class="col-sm-9">{{ pet.sexo }}</dd>
+
+            <dt class="col-sm-3">Nascimento</dt>
+            <dd class="col-sm-9">{{ pet.data_nascimento }}</dd>
+
+            <dt class="col-sm-3">Peso</dt>
+            <dd class="col-sm-9">{{ pet.peso }} kg</dd>
+
+            <dt class="col-sm-3">Pelagem</dt>
+            <dd class="col-sm-9">{{ pet.pelagem }}</dd>
+
+            <dt class="col-sm-3">Observacoes</dt>
+            <dd class="col-sm-9">{{ pet.observacoes|default:"-" }}</dd>
+        </dl>
+    </div>
+</div>
+{% endblock %}

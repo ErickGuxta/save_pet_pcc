@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Pets - SavePet{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h4 mb-1">Pets</h1>
+        <p class="text-muted mb-0">Pets cadastrados pelo tutor.</p>
+    </div>
+    <a href="{% url 'pets:create' %}" class="btn btn-primary">Novo pet</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Especie</th>
+                    <th>Raca</th>
+                    <th>Peso</th>
+                    <th class="text-end">Acoes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pet in pets %}
+                    <tr>
+                        <td>{{ pet.nome }}</td>
+                        <td>{{ pet.especie }}</td>
+                        <td>{{ pet.raca }}</td>
+                        <td>{{ pet.peso }} kg</td>
+                        <td class="text-end">
+                            <a href="{% url 'pets:detail' pet.id %}" class="btn btn-outline-secondary btn-sm">Ver</a>
+                            <a href="{% url 'pets:edit' pet.id %}" class="btn btn-outline-primary btn-sm">Editar</a>
+                            <a href="{% url 'pets:delete' pet.id %}" class="btn btn-outline-danger btn-sm">Excluir</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            Nenhum pet cadastrado.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
