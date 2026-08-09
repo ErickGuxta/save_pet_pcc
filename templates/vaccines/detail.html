@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}{{ vaccine.nome }} - SavePet{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h4 mb-1">{{ vaccine.nome }}</h1>
+        <p class="text-muted mb-0">Detalhes da vacina.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'vaccines:edit' vaccine.id %}" class="btn btn-outline-primary">Editar</a>
+        <a href="{% url 'vaccines:index' %}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Pet</dt>
+            <dd class="col-sm-9">{{ vaccine.pet.nome }}</dd>
+
+            <dt class="col-sm-3">Vacina</dt>
+            <dd class="col-sm-9">{{ vaccine.nome }}</dd>
+
+            <dt class="col-sm-3">Lote</dt>
+            <dd class="col-sm-9">{{ vaccine.lote }}</dd>
+
+            <dt class="col-sm-3">Aplicacao</dt>
+            <dd class="col-sm-9">{{ vaccine.data_aplicacao|date:"d/m/Y" }}</dd>
+
+            <dt class="col-sm-3">Reforco</dt>
+            <dd class="col-sm-9">{{ vaccine.data_reforco|date:"d/m/Y"|default:"-" }}</dd>
+
+            <dt class="col-sm-3">Veterinario</dt>
+            <dd class="col-sm-9">{{ vaccine.veterinario }}</dd>
+
+            <dt class="col-sm-3">Clinica</dt>
+            <dd class="col-sm-9">{{ vaccine.clinica }}</dd>
+
+            <dt class="col-sm-3">Observacoes</dt>
+            <dd class="col-sm-9">{{ vaccine.observacoes|default:"-" }}</dd>
+        </dl>
+    </div>
+</div>
+{% endblock %}

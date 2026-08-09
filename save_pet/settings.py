@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.accounts',
     'apps.pets',
-    'apps.vaccines',    
+    'apps.vaccines',
+    'apps.locator',
 ]
 
 MIDDLEWARE = [

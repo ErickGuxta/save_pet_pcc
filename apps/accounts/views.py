@@ -45,12 +45,12 @@ def index(request):
 
 @login_required
 def vaccines(request):
-    return render(request, "accounts/vaccines.html")
+    return redirect("vaccines:index")
 
 
 @login_required
 def locator(request):
-    return render(request, "accounts/locator.html")
+    return redirect("locator:index")
 
 # ============================================================
 # Cadastro público de tutor
