@@ -3,78 +3,96 @@
 {% block title %}Localizador - SavePet{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+<div class="page-header">
     <div>
-        <h1 class="h4 mb-1">Localizador</h1>
-        <p class="text-muted mb-0">Rastreadores vinculados aos pets e suas ultimas localizacoes.</p>
+        <h1 class="page-title">Localizador</h1>
+        <p class="page-subtitle">Rastreadores vinculados aos pets e suas últimas localizações.</p>
     </div>
-    <a href="{% url 'locator:create' %}" class="btn btn-primary">Vincular rastreador</a>
+    <a href="{% url 'locator:create' %}" class="pet-btn-primary">+ Vincular rastreador</a>
 </div>
 
 <div class="row g-4">
-    <div class="col-lg-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h2 class="h5 mb-3">Novo rastreador</h2>
-                <form method="post" novalidate>
-                    {% csrf_token %}
-
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% for error in field.errors %}
-                                <div class="text-danger small">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-
-                    <button type="submit" class="btn btn-primary w-100">Salvar</button>
-                </form>
-            </div>
+    <div class="col-xl-4">
+        <div class="pet-card">
+            <h2 class="h5 mb-4">Novo rastreador</h2>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="pet-btn-primary w-100">Salvar</button>
+            </form>
         </div>
     </div>
+    <div class="col-xl-8">
+        <div class="pet-card mb-4">
+            <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+                <div>
+                    <h2 class="h5 mb-1">Mapa do localizador</h2>
+                    <p class="text-muted small mb-0">
+                        {% if ultima_localizacao %}
+                            Última posição de {{ ultima_localizacao.rastreador.pet.nome }} em {{ ultima_localizacao.timestamp|date:"d/m/Y H:i" }}.
+                        {% else %}
+                            Registre uma localização para visualizar o mapa.
+                        {% endif %}
+                    </p>
+                </div>
+                {% if ultima_localizacao %}
+                    <span class="pet-badge">{{ ultima_localizacao.latitude }}, {{ ultima_localizacao.longitude }}</span>
+                {% endif %}
+            </div>
+            {% if ultima_localizacao %}
+                <iframe
+                    class="map-embed"
+                    title="Mapa geral dos rastreadores"
+                    src="https://www.openstreetmap.org/export/embed.html?bbox={{ map_bbox.min_lng }}%2C{{ map_bbox.min_lat }}%2C{{ map_bbox.max_lng }}%2C{{ map_bbox.max_lat }}&layer=mapnik&marker={{ ultima_localizacao.latitude }}%2C{{ ultima_localizacao.longitude }}">
+                </iframe>
+            {% else %}
+                <div class="map-panel">Mapa aguardando coordenadas do rastreador.</div>
+            {% endif %}
+        </div>
 
-    <div class="col-lg-8">
-        <div class="card shadow-sm">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+        <div class="pet-card p-0">
+            <div class="table-wrap">
+                <table class="savepet-table">
                     <thead>
                         <tr>
                             <th>Pet</th>
                             <th>Identificador</th>
                             <th>Modelo</th>
-                            <th>Ultima localizacao</th>
-                            <th class="text-end">Acoes</th>
+                            <th>Última localização</th>
+                            <th class="text-end">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for rastreador in rastreadores %}
                             {% with ultima=rastreador.ultima_localizacao %}
                                 <tr>
-                                    <td>{{ rastreador.pet.nome }}</td>
+                                    <td><strong>{{ rastreador.pet.nome }}</strong></td>
                                     <td>{{ rastreador.identificador }}</td>
-                                    <td>{{ rastreador.modelo }}</td>
+                                    <td class="text-muted">{{ rastreador.modelo }}</td>
                                     <td>
                                         {% if ultima %}
-                                            {{ ultima.latitude }}, {{ ultima.longitude }}
+                                            <span class="pet-badge">{{ ultima.latitude }}, {{ ultima.longitude }}</span>
                                             <span class="text-muted small d-block">{{ ultima.timestamp|date:"d/m/Y H:i" }}</span>
                                         {% else %}
-                                            <span class="text-muted">Sem localizacao</span>
+                                            <span class="text-muted">Sem localização</span>
                                         {% endif %}
                                     </td>
                                     <td class="text-end">
-                                        <a href="{% url 'locator:detail' rastreador.id %}" class="btn btn-outline-secondary btn-sm">Ver</a>
-                                        <a href="{% url 'locator:edit' rastreador.id %}" class="btn btn-outline-primary btn-sm">Editar</a>
-                                        <a href="{% url 'locator:delete' rastreador.id %}" class="btn btn-outline-danger btn-sm">Excluir</a>
+                                        <a href="{% url 'locator:detail' rastreador.id %}" class="pet-btn-ghost">Ver</a>
+                                        <a href="{% url 'locator:edit' rastreador.id %}" class="pet-btn-ghost">Editar</a>
+                                        <a href="{% url 'locator:delete' rastreador.id %}" class="pet-btn-ghost pet-btn-danger">Excluir</a>
                                     </td>
                                 </tr>
                             {% endwith %}
                         {% empty %}
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-4">
-                                    Nenhum rastreador vinculado.
-                                </td>
+                                <td colspan="5" class="text-center text-muted py-4">Nenhum rastreador vinculado.</td>
                             </tr>
                         {% endfor %}
                     </tbody>

@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-1vmrt857lq((j5t@hp&o)i_p06-yrfrz6i3jz!%))l$s(x7lmu
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 
 
 # Application definition
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'apps.pets',
     'apps.vaccines',
     'apps.locator',
+    'apps.blog',
 ]
 
 MIDDLEWARE = [
@@ -119,6 +120,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 LOGIN_URL = '/access/login/'

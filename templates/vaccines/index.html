@@ -3,71 +3,64 @@
 {% block title %}Vacinas - SavePet{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+<div class="page-header">
     <div>
-        <h1 class="h4 mb-1">Vacinas</h1>
-        <p class="text-muted mb-0">Historico de vacinas cadastradas para seus pets.</p>
+        <h1 class="page-title">Vacinas</h1>
+        <p class="page-subtitle">Histórico de aplicações e reforços dos seus pets.</p>
     </div>
-    <a href="{% url 'vaccines:create' %}" class="btn btn-primary">Nova vacina</a>
+    <a href="{% url 'vaccines:create' %}" class="pet-btn-primary">+ Nova vacina</a>
 </div>
 
-<div class="row g-4">
-    <div class="col-lg-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h2 class="h5 mb-3">Cadastrar vacina</h2>
-                <form method="post" novalidate>
-                    {% csrf_token %}
-
+<div class="row g-4 vaccines-layout">
+    <div class="col-12">
+        <div class="pet-card">
+            <h2 class="h5 mb-4">Cadastrar vacina</h2>
+            <form method="post" novalidate class="vaccine-form">
+                {% csrf_token %}
+                <div class="row g-3">
                     {% for field in form %}
-                        <div class="mb-3">
+                        <div class="{% if field.name == 'pet' or field.name == 'observacoes' %}col-12{% else %}col-md-6 col-xl-4{% endif %}">
                             <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
                             {{ field }}
-                            {% for error in field.errors %}
-                                <div class="text-danger small">{{ error }}</div>
-                            {% endfor %}
+                            {{ field.errors }}
                         </div>
                     {% endfor %}
-
-                    <button type="submit" class="btn btn-primary w-100">Salvar</button>
-                </form>
-            </div>
+                </div>
+                <button type="submit" class="pet-btn-primary mt-4">Salvar</button>
+            </form>
         </div>
     </div>
-
-    <div class="col-lg-8">
-        <div class="card shadow-sm">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+    <div class="col-12">
+        <div class="pet-card p-0">
+            <div class="table-wrap">
+                <table class="savepet-table vaccines-table">
                     <thead>
                         <tr>
-                            <th>Pet</th>
+                            <th class="pet-name-column">Pet</th>
                             <th>Vacina</th>
-                            <th>Aplicacao</th>
-                            <th>Reforco</th>
-                            <th>Veterinario</th>
-                            <th class="text-end">Acoes</th>
+                            <th>Aplicação</th>
+                            <th>Reforço</th>
+                            <th>Veterinário</th>
+                            <th class="text-end">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for vaccine in vaccines %}
                             <tr>
-                                <td>{{ vaccine.pet.nome }}</td>
-                                <td>{{ vaccine.nome }}</td>
+                                <td class="pet-name-cell"><strong>{{ vaccine.pet.nome }}</strong></td>
+                                <td>{{ vaccine.nome }}<span class="text-muted small d-block">Lote {{ vaccine.lote }}</span></td>
                                 <td>{{ vaccine.data_aplicacao|date:"d/m/Y" }}</td>
-                                <td>{{ vaccine.data_reforco|date:"d/m/Y"|default:"-" }}</td>
-                                <td>{{ vaccine.veterinario }}</td>
+                                <td>{% if vaccine.data_reforco %}<span class="pet-badge">{{ vaccine.data_reforco|date:"d/m/Y" }}</span>{% else %}<span class="text-muted">-</span>{% endif %}</td>
+                                <td class="text-muted">{{ vaccine.veterinario }}</td>
                                 <td class="text-end">
-                                    <a href="{% url 'vaccines:detail' vaccine.id %}" class="btn btn-outline-secondary btn-sm">Ver</a>
-                                    <a href="{% url 'vaccines:edit' vaccine.id %}" class="btn btn-outline-primary btn-sm">Editar</a>
-                                    <a href="{% url 'vaccines:delete' vaccine.id %}" class="btn btn-outline-danger btn-sm">Excluir</a>
+                                    <a href="{% url 'vaccines:detail' vaccine.id %}" class="pet-btn-ghost">Ver</a>
+                                    <a href="{% url 'vaccines:edit' vaccine.id %}" class="pet-btn-ghost">Editar</a>
+                                    <a href="{% url 'vaccines:delete' vaccine.id %}" class="pet-btn-ghost pet-btn-danger">Excluir</a>
                                 </td>
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">
-                                    Nenhuma vacina cadastrada.
-                                </td>
+                                <td colspan="6" class="text-center text-muted py-4">Nenhuma vacina cadastrada.</td>
                             </tr>
                         {% endfor %}
                     </tbody>

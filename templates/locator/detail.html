@@ -3,107 +3,91 @@
 {% block title %}{{ rastreador.identificador }} - SavePet{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+<div class="page-header">
     <div>
-        <h1 class="h4 mb-1">{{ rastreador.identificador }}</h1>
-        <p class="text-muted mb-0">Localizacoes do rastreador vinculado a {{ rastreador.pet.nome }}.</p>
+        <a class="pet-btn-ghost mb-2" href="{% url 'locator:index' %}" style="padding-left: 0;">← Localizador</a>
+        <h1 class="page-title">{{ rastreador.identificador }}</h1>
+        <p class="page-subtitle">Localizações do rastreador vinculado a {{ rastreador.pet.nome }}.</p>
     </div>
-    <div class="d-flex gap-2">
-        <a href="{% url 'locator:edit' rastreador.id %}" class="btn btn-outline-primary">Editar</a>
-        <a href="{% url 'locator:index' %}" class="btn btn-outline-secondary">Voltar</a>
-    </div>
+    <a href="{% url 'locator:edit' rastreador.id %}" class="pet-btn-secondary">Editar</a>
 </div>
 
 <div class="row g-4">
-    <div class="col-lg-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <h2 class="h5 mb-3">Rastreador</h2>
-                <dl class="row mb-0">
-                    <dt class="col-5">Pet</dt>
-                    <dd class="col-7">{{ rastreador.pet.nome }}</dd>
-
-                    <dt class="col-5">Modelo</dt>
-                    <dd class="col-7">{{ rastreador.modelo }}</dd>
-
-                    <dt class="col-5">Vinculado em</dt>
-                    <dd class="col-7">{{ rastreador.data_vinculacao|date:"d/m/Y H:i" }}</dd>
-                </dl>
-            </div>
+    <div class="col-xl-4">
+        <div class="pet-card mb-4">
+            <h2 class="h5 mb-4">Rastreador</h2>
+            <dl class="mb-0">
+                <dt>Pet</dt><dd>{{ rastreador.pet.nome }}</dd>
+                <dt>Modelo</dt><dd>{{ rastreador.modelo }}</dd>
+                <dt>Vinculado em</dt><dd class="mb-0">{{ rastreador.data_vinculacao|date:"d/m/Y H:i" }}</dd>
+            </dl>
         </div>
 
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h2 class="h5 mb-3">Nova localizacao</h2>
-                <form method="post" novalidate>
-                    {% csrf_token %}
-
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% for error in field.errors %}
-                                <div class="text-danger small">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-
-                    <button type="submit" class="btn btn-primary w-100">Salvar localizacao</button>
-                </form>
-            </div>
+        <div class="pet-card">
+            <h2 class="h5 mb-4">Nova localização</h2>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="pet-btn-primary w-100">Salvar localização</button>
+            </form>
         </div>
     </div>
 
-    <div class="col-lg-8">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <h2 class="h5 mb-3">Ultima localizacao</h2>
-                {% if ultima_localizacao %}
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <span class="text-muted small d-block">Latitude</span>
-                            <strong>{{ ultima_localizacao.latitude }}</strong>
-                        </div>
-                        <div class="col-md-4">
-                            <span class="text-muted small d-block">Longitude</span>
-                            <strong>{{ ultima_localizacao.longitude }}</strong>
-                        </div>
-                        <div class="col-md-4">
-                            <span class="text-muted small d-block">Horario</span>
-                            <strong>{{ ultima_localizacao.timestamp|date:"d/m/Y H:i" }}</strong>
-                        </div>
-                    </div>
-                    <div class="border rounded bg-light mt-4 d-flex align-items-center justify-content-center" style="min-height: 280px;">
-                        <span class="text-muted">Mapa: {{ ultima_localizacao.latitude }}, {{ ultima_localizacao.longitude }}</span>
-                    </div>
-                {% else %}
-                    <p class="text-muted mb-0">Nenhuma localizacao registrada para este rastreador.</p>
-                {% endif %}
-            </div>
+    <div class="col-xl-8">
+        <div class="pet-card mb-4">
+            <h2 class="h5 mb-4">Última localização</h2>
+            {% if ultima_localizacao %}
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4"><div class="mini-panel"><small class="d-block text-muted">Latitude</small><strong>{{ ultima_localizacao.latitude }}</strong></div></div>
+                    <div class="col-md-4"><div class="mini-panel"><small class="d-block text-muted">Longitude</small><strong>{{ ultima_localizacao.longitude }}</strong></div></div>
+                    <div class="col-md-4"><div class="mini-panel"><small class="d-block text-muted">Horário</small><strong>{{ ultima_localizacao.timestamp|date:"d/m/Y H:i" }}</strong></div></div>
+                </div>
+                <iframe
+                    class="map-embed"
+                    title="Localização de {{ rastreador.pet.nome }}"
+                    src="https://www.openstreetmap.org/export/embed.html?bbox={{ map_bbox.min_lng }}%2C{{ map_bbox.min_lat }}%2C{{ map_bbox.max_lng }}%2C{{ map_bbox.max_lat }}&layer=mapnik&marker={{ ultima_localizacao.latitude }}%2C{{ ultima_localizacao.longitude }}">
+                </iframe>
+                <div class="d-flex gap-3 flex-wrap mt-4">
+                    <a class="pet-btn-secondary" target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat={{ ultima_localizacao.latitude }}&mlon={{ ultima_localizacao.longitude }}#map=16/{{ ultima_localizacao.latitude }}/{{ ultima_localizacao.longitude }}">🗺 Ver no mapa completo</a>
+                    <a class="pet-btn-primary" href="{% url 'locator:detail' rastreador.id %}">🔄 Atualizar</a>
+                </div>
+            {% else %}
+                <div class="map-panel">Nenhuma localização registrada para este rastreador.</div>
+            {% endif %}
         </div>
 
-        <div class="card shadow-sm">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+        <div class="pet-card p-0">
+            <div class="p-4">
+                <h2 class="h5 mb-1">Histórico de localizações</h2>
+                <p class="text-muted small mb-0">Pontos gerados pelo rastreador em ordem recente.</p>
+            </div>
+            <div class="table-wrap">
+                <table class="savepet-table">
                     <thead>
                         <tr>
+                            <th>Pet</th>
                             <th>Latitude</th>
                             <th>Longitude</th>
-                            <th>Horario</th>
+                            <th>Horário</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for localizacao in localizacoes %}
                             <tr>
+                                <td><strong>{{ rastreador.pet.nome }}</strong></td>
                                 <td>{{ localizacao.latitude }}</td>
                                 <td>{{ localizacao.longitude }}</td>
                                 <td>{{ localizacao.timestamp|date:"d/m/Y H:i" }}</td>
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="3" class="text-center text-muted py-4">
-                                    Nenhum ponto de localizacao registrado.
-                                </td>
+                                <td colspan="4" class="text-center text-muted py-4">Nenhum ponto registrado.</td>
                             </tr>
                         {% endfor %}
                     </tbody>

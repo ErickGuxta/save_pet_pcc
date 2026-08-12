@@ -1,5 +1,8 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 #importando User padrão Django e validações
 # from django.contrib.auth.models import User
@@ -70,6 +73,65 @@ class UserForm(forms.ModelForm):
 RegistroUsuarioForm = UserForm
 
 
+class PublicUserForm(forms.ModelForm):
+    nome = forms.CharField(
+        label="Nome",
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control", "autocomplete": "name"}),
+    )
+    password1 = forms.CharField(
+        label="Senha",
+        strip=False,
+        widget=forms.PasswordInput(attrs={"class": "form-control", "autocomplete": "new-password"}),
+    )
+    password2 = forms.CharField(
+        label="Confirmar senha",
+        strip=False,
+        widget=forms.PasswordInput(attrs={"class": "form-control", "autocomplete": "new-password"}),
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            "username",
+            "email",
+            "nome",
+        ]
+        widgets = {
+            "username": forms.TextInput(attrs={"class": "form-control", "autocomplete": "username"}),
+            "email": forms.EmailInput(attrs={"class": "form-control", "autocomplete": "email"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.order_fields(["nome", "username", "email", "password1", "password2"])
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("password1")
+        password2 = cleaned_data.get("password2")
+
+        if password1 and password2 and password1 != password2:
+            self.add_error("password2", "As senhas não conferem.")
+
+        if password1:
+            try:
+                validate_password(password1)
+            except ValidationError as error:
+                self.add_error("password1", error)
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.first_name = self.cleaned_data.get("nome", "")
+        user.set_password(self.cleaned_data["password1"])
+        if commit:
+            user.save()
+        return user
+
+
 class PerfilUsuarioForm(forms.Form):
     nome        = forms.CharField(label="Nome", max_length=150, required=False)
     email       = forms.EmailField(label="E-mail", required=False)
@@ -107,3 +169,21 @@ class PerfilUsuarioForm(forms.Form):
                     "estado": getattr(perfil, "estado", ""),
                 }
             )
+
+
+class PerfilSenhaForm(PasswordChangeForm):
+    old_password = forms.CharField(
+        label="Senha atual",
+        strip=False,
+        widget=forms.PasswordInput(attrs={"class": "form-control", "autocomplete": "current-password"}),
+    )
+    new_password1 = forms.CharField(
+        label="Nova senha",
+        strip=False,
+        widget=forms.PasswordInput(attrs={"class": "form-control", "autocomplete": "new-password"}),
+    )
+    new_password2 = forms.CharField(
+        label="Confirmar nova senha",
+        strip=False,
+        widget=forms.PasswordInput(attrs={"class": "form-control", "autocomplete": "new-password"}),
+    )

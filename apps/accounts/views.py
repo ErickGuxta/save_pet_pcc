@@ -13,11 +13,16 @@
 from django.shortcuts import render, get_object_or_404, redirect
 
 #importando User padrão do django; biblioteca de login_required e user_passes_test para acesso restrito a usuários
-from django.contrib.auth import get_user_model, login
+from django.contrib.auth import get_user_model, login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 
-from .forms import PerfilUsuarioForm, UserForm
+from apps.locator.models import Rastreador
+from apps.pets.models import Pet
+from apps.vaccines.models import Vaccine
+from apps.blog.models import ArtigoBlog
+
+from .forms import PerfilSenhaForm, PerfilUsuarioForm, PublicUserForm, UserForm
 from .models import Usuario
 
 User = get_user_model()
@@ -35,7 +40,21 @@ def is_admin(user):
 
 @login_required
 def dashboard(request):
-    return render(request, "accounts/dashboard.html")
+    pets = Pet.objects.filter(usuario=request.user)
+    vaccines = Vaccine.objects.filter(usuario=request.user).select_related("pet")
+    trackers = Rastreador.objects.filter(pet__usuario=request.user)
+    upcoming_vaccines = vaccines.exclude(data_reforco__isnull=True).order_by("data_reforco")[:4]
+    recent_articles = ArtigoBlog.objects.filter(status=ArtigoBlog.STATUS_PUBLICADO).select_related("categoria", "usuario")[:3]
+
+    context = {
+        "pets": pets[:5],
+        "total_pets": pets.count(),
+        "total_vaccines": vaccines.count(),
+        "total_trackers": trackers.count(),
+        "upcoming_vaccines": upcoming_vaccines,
+        "recent_articles": recent_articles,
+    }
+    return render(request, "accounts/dashboard.html", context)
 
 
 @login_required
@@ -57,10 +76,10 @@ def locator(request):
 # ============================================================
 def create(request):
     #instanciando a metaclasse UserForm
-    form = UserForm()
+    form = PublicUserForm()
 
     if request.method == "POST":
-        form = UserForm(request.POST)
+        form = PublicUserForm(request.POST)
 
         if form.is_valid():
             user = form.save()
@@ -91,8 +110,26 @@ def create(request):
 def profile(request):
     Usuario.objects.get_or_create(user=request.user)
     form = PerfilUsuarioForm(user=request.user)
+    password_form = PerfilSenhaForm(user=request.user)
 
     if request.method == "POST":
+        if request.POST.get("form_type") == "password":
+            password_form = PerfilSenhaForm(user=request.user, data=request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, "Senha atualizada.")
+                return redirect("accounts:profile")
+
+            return render(
+                request,
+                "accounts/profile.html",
+                {
+                    "form": form,
+                    "password_form": password_form,
+                },
+            )
+
         form = PerfilUsuarioForm(request.POST, user=request.user)
         if form.is_valid():
             user = request.user
@@ -117,12 +154,14 @@ def profile(request):
             return redirect("accounts:profile")
         else:
             context = {
-                "form": form
+                "form": form,
+                "password_form": password_form,
             }
             return render(request, "accounts/profile.html", context)
 
     context = {
-        "form": form
+        "form": form,
+        "password_form": password_form,
     }
 
     return render(request, "accounts/profile.html", context)

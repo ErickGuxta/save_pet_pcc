@@ -19,7 +19,7 @@ def pets(request):
 
 @login_required
 def detail(request, id):
-    pet = get_object_or_404(Pet, id=id)
+    pet = get_object_or_404(Pet, id=id, usuario=request.user)
 
     context = {
         "pet": pet

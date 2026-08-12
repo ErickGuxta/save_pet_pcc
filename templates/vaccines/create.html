@@ -3,32 +3,27 @@
 {% block title %}Nova vacina - SavePet{% endblock %}
 
 {% block content %}
-<div class="mb-4">
-    <h1 class="h4 mb-1">Nova vacina</h1>
-    <p class="text-muted mb-0">Cadastre uma vacina para um pet.</p>
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Nova vacina</h1>
+        <p class="page-subtitle">Registre aplicação, lote, clínica e reforço.</p>
+    </div>
+    <a href="{% url 'vaccines:index' %}" class="pet-btn-secondary">Cancelar</a>
 </div>
 
-<form method="post" novalidate>
+<form method="post" novalidate class="vaccine-form">
     {% csrf_token %}
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="row g-3">
-                {% for field in form %}
-                    <div class="col-md-6">
-                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        {{ field }}
-                        {% for error in field.errors %}
-                            <div class="text-danger small">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-            </div>
+    <div class="pet-card">
+        <div class="row g-3">
+            {% for field in form %}
+                <div class="{% if field.name == 'pet' or field.name == 'observacoes' %}col-12{% else %}col-md-6{% endif %}">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
         </div>
     </div>
-
-    <div class="mt-4 d-flex gap-2">
-        <button type="submit" class="btn btn-primary">Salvar</button>
-        <a href="{% url 'vaccines:index' %}" class="btn btn-outline-secondary">Cancelar</a>
-    </div>
+    <button type="submit" class="pet-btn-primary mt-4">Salvar vacina</button>
 </form>
 {% endblock %}

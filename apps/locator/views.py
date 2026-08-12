@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import LocalizacaoForm, RastreadorForm
-from .models import Rastreador
+from .models import Localizacao, Rastreador
 
 
 @login_required
@@ -26,7 +26,20 @@ def index(request):
     context = {
         "rastreadores": rastreadores,
         "form": form,
+        "ultima_localizacao": (
+            Localizacao.objects.filter(rastreador__pet__usuario=request.user)
+            .select_related("rastreador", "rastreador__pet")
+            .first()
+        ),
     }
+    if context["ultima_localizacao"]:
+        ultima = context["ultima_localizacao"]
+        context["map_bbox"] = {
+            "min_lng": ultima.longitude - 0.015,
+            "min_lat": ultima.latitude - 0.010,
+            "max_lng": ultima.longitude + 0.015,
+            "max_lat": ultima.latitude + 0.010,
+        }
 
     return render(request, "locator/index.html", context)
 
@@ -57,6 +70,14 @@ def detail(request, id):
         "ultima_localizacao": rastreador.ultima_localizacao,
         "form": form,
     }
+    if context["ultima_localizacao"]:
+        ultima = context["ultima_localizacao"]
+        context["map_bbox"] = {
+            "min_lng": ultima.longitude - 0.015,
+            "min_lat": ultima.latitude - 0.010,
+            "max_lng": ultima.longitude + 0.015,
+            "max_lat": ultima.latitude + 0.010,
+        }
 
     return render(request, "locator/detail.html", context)
 
