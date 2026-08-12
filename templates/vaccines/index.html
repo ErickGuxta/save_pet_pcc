@@ -13,24 +13,6 @@
 
 <div class="row g-4 vaccines-layout">
     <div class="col-12">
-        <div class="pet-card">
-            <h2 class="h5 mb-4">Cadastrar vacina</h2>
-            <form method="post" novalidate class="vaccine-form">
-                {% csrf_token %}
-                <div class="row g-3">
-                    {% for field in form %}
-                        <div class="{% if field.name == 'pet' or field.name == 'observacoes' %}col-12{% else %}col-md-6 col-xl-4{% endif %}">
-                            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {{ field.errors }}
-                        </div>
-                    {% endfor %}
-                </div>
-                <button type="submit" class="pet-btn-primary mt-4">Salvar</button>
-            </form>
-        </div>
-    </div>
-    <div class="col-12">
         <div class="pet-card p-0">
             <div class="table-wrap">
                 <table class="savepet-table vaccines-table">
@@ -38,8 +20,8 @@
                         <tr>
                             <th class="pet-name-column">Pet</th>
                             <th>Vacina</th>
-                            <th>Aplicação</th>
-                            <th>Reforço</th>
+                            <th class="vaccine-date-column">Aplicação</th>
+                            <th class="vaccine-date-column">Reforço</th>
                             <th>Veterinário</th>
                             <th class="text-end">Ações</th>
                         </tr>
@@ -47,10 +29,19 @@
                     <tbody>
                         {% for vaccine in vaccines %}
                             <tr>
-                                <td class="pet-name-cell"><strong>{{ vaccine.pet.nome }}</strong></td>
+                                <td class="pet-name-cell">
+                                    <div class="vaccine-pet-summary">
+                                        {% if vaccine.pet.foto %}
+                                            <img src="{{ vaccine.pet.foto.url }}" alt="{{ vaccine.pet.nome }}" class="vaccine-pet-photo">
+                                        {% else %}
+                                            <span class="vaccine-pet-photo vaccine-pet-photo-placeholder">🐾</span>
+                                        {% endif %}
+                                        <strong>{{ vaccine.pet.nome }}</strong>
+                                    </div>
+                                </td>
                                 <td>{{ vaccine.nome }}<span class="text-muted small d-block">Lote {{ vaccine.lote }}</span></td>
-                                <td>{{ vaccine.data_aplicacao|date:"d/m/Y" }}</td>
-                                <td>{% if vaccine.data_reforco %}<span class="pet-badge">{{ vaccine.data_reforco|date:"d/m/Y" }}</span>{% else %}<span class="text-muted">-</span>{% endif %}</td>
+                                <td class="vaccine-date-cell"><span class="vaccine-date-value">{{ vaccine.data_aplicacao|date:"d/m/Y" }}</span></td>
+                                <td class="vaccine-date-cell">{% if vaccine.data_reforco %}<span class="vaccine-date-value vaccine-date-next">{{ vaccine.data_reforco|date:"d/m/Y" }}</span>{% else %}<span class="text-muted">-</span>{% endif %}</td>
                                 <td class="text-muted">{{ vaccine.veterinario }}</td>
                                 <td class="text-end">
                                     <a href="{% url 'vaccines:detail' vaccine.id %}" class="pet-btn-ghost">Ver</a>

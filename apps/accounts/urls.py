@@ -20,6 +20,7 @@ urlpatterns = [
 
     # Administração de usuários
     path("usuarios/",                 views.users,     name="users"),
+    path("usuarios/create/",          views.user_create, name="user_create"),
     path("usuarios/<int:id>/",        views.detail,    name="detail"),
     path("usuarios/<int:id>/edit/",   views.edit,      name="edit"),
     path("usuarios/<int:id>/delete/", views.delete,    name="delete"),

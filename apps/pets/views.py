@@ -4,6 +4,7 @@ from django.contrib import messages
 
 from .forms import PetForm
 from .models import Pet
+from .status import build_pet_statuses, build_pet_timeline
 
 
 @login_required
@@ -19,10 +20,16 @@ def pets(request):
 
 @login_required
 def detail(request, id):
-    pet = get_object_or_404(Pet, id=id, usuario=request.user)
+    pet = get_object_or_404(
+        Pet.objects.prefetch_related("vacinas").select_related("rastreador"),
+        id=id,
+        usuario=request.user,
+    )
 
     context = {
-        "pet": pet
+        "pet": pet,
+        "pet_statuses": build_pet_statuses(pet),
+        "timeline_events": build_pet_timeline(pet),
     }
 
     return render(request, "pets/detail.html", context)

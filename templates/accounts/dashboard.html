@@ -49,42 +49,36 @@
                 <h2 class="h5 m-0">Meus Pets</h2>
                 <a class="pet-btn-ghost" href="{% url 'pets:index' %}">Ver todos →</a>
             </div>
-            <div class="table-wrap">
-                <table class="savepet-table">
-                    <thead>
-                        <tr>
-                            <th>Pet</th>
-                            <th>Espécie</th>
-                            <th>Raça</th>
-                            <th>Peso</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for pet in pets %}
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center gap-3">
-                                        <span class="avatar">{{ pet.nome|first|upper }}</span>
-                                        <strong>{{ pet.nome }}</strong>
-                                    </div>
-                                </td>
-                                <td class="text-muted">{{ pet.especie }}</td>
-                                <td class="text-muted">{{ pet.raca }}</td>
-                                <td class="text-muted">{{ pet.peso }} kg</td>
-                                <td class="text-end">
-                                    <a class="pet-btn-ghost" href="{% url 'pets:detail' pet.id %}">Ver perfil →</a>
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-4">
-                                    Nenhum pet cadastrado ainda.
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div class="dashboard-pet-grid">
+                {% for pet in pets %}
+                    <article class="dashboard-pet-card">
+                        {% if pet.foto %}
+                            <img src="{{ pet.foto.url }}" alt="{{ pet.nome }}" class="dashboard-pet-photo">
+                        {% else %}
+                            <span class="dashboard-pet-photo dashboard-pet-placeholder">{% if pet.especie == "Gato" %}🐱{% elif pet.especie == "Pássaro" %}🐦{% elif pet.especie == "Peixe" %}🐟{% else %}🐶{% endif %}</span>
+                        {% endif %}
+                        <div class="dashboard-pet-body">
+                            <div class="dashboard-pet-header">
+                                <div>
+                                    <h3>{{ pet.nome }}</h3>
+                                    <p>{{ pet.especie }} · {{ pet.raca }}</p>
+                                </div>
+                                <strong>{{ pet.peso }} kg</strong>
+                            </div>
+                            <div class="pet-status-list">
+                                {% for status in pet.status_indicators %}
+                                    <span class="pet-badge {% if status.style == 'warning' %}warning{% elif status.style == 'danger' %}danger{% elif status.style == 'muted' %}muted{% endif %}">{{ status.label }}</span>
+                                {% endfor %}
+                            </div>
+                            <a class="pet-btn-ghost dashboard-pet-link" href="{% url 'pets:detail' pet.id %}">Ver perfil →</a>
+                        </div>
+                    </article>
+                {% empty %}
+                    <div class="dashboard-empty-state">
+                        <p class="text-muted mb-3">Nenhum pet cadastrado ainda.</p>
+                        <a href="{% url 'pets:create' %}" class="pet-btn-primary">Cadastrar pet</a>
+                    </div>
+                {% endfor %}
             </div>
         </div>
     </div>

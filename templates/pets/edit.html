@@ -23,6 +23,12 @@
                             <div class="{% if field.name == 'foto' %}col-12{% else %}col-md-6{% endif %}">
                                 <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
                                 {{ field }}
+                                {% if field.name == "foto" and form.instance.foto %}
+                                    <div class="current-file-preview mt-2">
+                                        <img src="{{ form.instance.foto.url }}" alt="{{ form.instance.nome }}" class="current-pet-photo">
+                                        <span class="text-muted small">Foto atual: {{ form.instance.foto.name }}</span>
+                                    </div>
+                                {% endif %}
                                 {{ field.errors }}
                             </div>
                         {% endif %}

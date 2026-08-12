@@ -9,21 +9,9 @@ from .models import Vaccine
 #Listar Registros de Vacinas
 def vaccines(request):
     vaccines = Vaccine.objects.filter(usuario=request.user).select_related("pet")
-    form = VaccineForm(user=request.user)
-
-    if request.method == "POST":
-        form = VaccineForm(request.POST, user=request.user)
-
-        if form.is_valid():
-            vaccine = form.save(commit=False)
-            vaccine.usuario = request.user
-            vaccine.save()
-            messages.success(request, "Vacina cadastrada com sucesso.")
-            return redirect("vaccines:index")
 
     context = {
         "vaccines": vaccines,
-        "form": form,
     }
 
     return render(request, "vaccines/index.html", context)

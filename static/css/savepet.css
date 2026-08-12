@@ -362,6 +362,41 @@ a {
   box-shadow: 0 0 0 3px rgba(143, 216, 200, 0.18);
 }
 
+.date-br-input,
+.datetime-br-input {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  max-width: 220px;
+}
+
+.datetime-br-input {
+  max-width: 260px;
+}
+
+.date-br-input::placeholder,
+.datetime-br-input::placeholder {
+  color: #a0aec0;
+  letter-spacing: 0;
+}
+
+.current-file-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--soft);
+  border-radius: 12px;
+}
+
+.current-pet-photo {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--beige);
+  flex: 0 0 auto;
+}
+
 .form-label {
   font-size: 13px;
   font-weight: 800;
@@ -407,6 +442,103 @@ a {
 .pet-badge.danger {
   background: #fef2f2;
   color: var(--danger);
+}
+
+.pet-badge.muted {
+  background: var(--soft);
+  color: var(--muted);
+}
+
+.pet-status-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dashboard-pet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.dashboard-pet-card {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 14px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.dashboard-pet-photo {
+  width: 92px;
+  height: 100%;
+  min-height: 118px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--beige);
+}
+
+.dashboard-pet-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--teal-dark);
+  font-size: 38px;
+}
+
+.dashboard-pet-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.dashboard-pet-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.dashboard-pet-header h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-pet-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-pet-header strong {
+  flex: 0 0 auto;
+  color: var(--teal-dark);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.dashboard-pet-link {
+  align-self: flex-start;
+  margin-top: auto;
+  padding-left: 0;
+}
+
+.dashboard-empty-state {
+  grid-column: 1 / -1;
+  padding: 24px;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  background: var(--soft);
 }
 
 .table-wrap {
@@ -469,6 +601,140 @@ a {
   background: var(--soft);
   border-radius: 12px;
   padding: 10px 14px;
+}
+
+.pet-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.pet-info-item,
+.pet-health-item {
+  background: var(--soft);
+  border-radius: 12px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.pet-info-item span,
+.pet-health-item span,
+.pet-card-info-grid small {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.pet-info-item strong,
+.pet-card-info-grid strong {
+  display: block;
+  color: var(--ink);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.pet-health-list {
+  display: grid;
+  gap: 12px;
+}
+
+.pet-health-item p {
+  color: var(--ink);
+  line-height: 1.55;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.pet-timeline {
+  display: grid;
+  gap: 0;
+}
+
+.pet-timeline-item {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 14px;
+  position: relative;
+  padding-bottom: 18px;
+}
+
+.pet-timeline-item:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 18px;
+  bottom: 0;
+  width: 2px;
+  background: var(--line);
+}
+
+.pet-timeline-marker {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--teal-dark);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px var(--teal-light);
+  margin-top: 4px;
+  z-index: 1;
+}
+
+.pet-timeline-marker.booster {
+  background: var(--warning);
+  box-shadow: 0 0 0 2px #fef3c7;
+}
+
+.pet-timeline-marker.tracker,
+.pet-timeline-marker.location {
+  background: #7c3aed;
+  box-shadow: 0 0 0 2px #ede9fe;
+}
+
+.pet-timeline-marker.health {
+  background: #e58b4a;
+  box-shadow: 0 0 0 2px var(--beige);
+}
+
+.pet-timeline-content {
+  min-width: 0;
+  padding-bottom: 2px;
+}
+
+.pet-timeline-date {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.pet-timeline-content strong,
+.pet-timeline-content p {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.pet-timeline-content p {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 4px 0 0;
+}
+
+.pet-card-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pet-card-info-grid .mini-panel {
+  text-align: left;
+  min-width: 0;
+}
+
+.pet-card-info-wide {
+  grid-column: 1 / -1;
 }
 
 .tabs {
@@ -563,21 +829,120 @@ a {
   margin-bottom: 24px;
 }
 
+.admin-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-topbar-btn {
+  background: transparent;
+  color: #fff;
+  border-color: #fff;
+}
+
+.admin-topbar-btn:hover {
+  background: #fff;
+  color: var(--ink);
+}
+
 .admin-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(150px, 1fr));
   gap: 18px;
 }
 
-.module-grid {
+.admin-alert-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(340px, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
   align-items: start;
 }
 
+.admin-alert-card {
+  height: fit-content;
+}
+
+.admin-section-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.admin-section-title .pet-btn-ghost {
+  flex: 0 0 auto;
+}
+
+.admin-alert-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-alert-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+  min-width: 0;
+}
+
+.admin-alert-item strong,
+.admin-alert-item span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.admin-alert-item span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.admin-filter-bar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 240px) auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.admin-filter-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-card-filter {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(130px, 150px) minmax(140px, 170px) auto;
+  gap: 10px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  background: #fcfcfc;
+}
+
+.admin-card-filter .pet-btn-secondary {
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(280px, 1fr));
+  gap: 22px;
+  align-items: start;
+  grid-auto-flow: dense;
+}
+
 .admin-module-card {
-  min-height: 100%;
+  height: fit-content;
+}
+
+.admin-articles-card {
+  grid-column: 1 / -1;
 }
 
 .admin-card-header {
@@ -620,19 +985,69 @@ a {
   padding-right: 10px;
 }
 
+.admin-articles-table {
+  table-layout: auto;
+}
+
+.admin-article-title-cell {
+  min-width: 260px;
+}
+
+.admin-article-title,
+.admin-article-meta {
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.admin-article-meta {
+  margin-top: 4px;
+  line-height: 1.45;
+}
+
+.admin-articles-card .admin-actions-cell {
+  min-width: 220px;
+}
+
 .vaccines-layout {
   align-items: flex-start;
 }
 
 .vaccines-table {
   table-layout: auto;
-  min-width: 860px;
+  min-width: 0;
 }
 
 .vaccines-table .pet-name-column,
 .vaccines-table .pet-name-cell {
-  width: 24%;
-  min-width: 190px;
+  width: 18%;
+  min-width: 150px;
+  max-width: 210px;
+}
+
+.vaccines-table .vaccine-date-column,
+.vaccines-table .vaccine-date-cell {
+  width: 132px;
+  min-width: 132px;
+  white-space: nowrap;
+}
+
+.vaccine-date-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 102px;
+  padding: 7px 10px;
+  border-radius: 12px;
+  background: var(--soft);
+  color: var(--ink);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.vaccine-date-next {
+  background: var(--teal-light);
+  color: var(--teal-dark);
 }
 
 .vaccines-table .pet-name-cell strong {
@@ -640,6 +1055,30 @@ a {
   white-space: normal;
   overflow-wrap: anywhere;
   line-height: 1.35;
+}
+
+.vaccine-pet-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.vaccine-pet-photo {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--beige);
+  flex: 0 0 auto;
+}
+
+.vaccine-pet-photo-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--teal-dark);
+  font-size: 20px;
 }
 
 .vaccine-form select[name="pet"] {
@@ -678,6 +1117,30 @@ a {
   margin: 8px 0 0;
   padding: 8px 10px;
   font-size: 12px;
+}
+
+@media (max-width: 1199px) {
+  .module-grid {
+    grid-template-columns: repeat(2, minmax(300px, 1fr));
+  }
+
+  .admin-articles-card {
+    grid-column: auto;
+  }
+
+  .admin-articles-card .admin-card-filter {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-articles-card .admin-card-filter .pet-btn-secondary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 1399px) {
+  .dashboard-pet-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 991px) {
@@ -721,8 +1184,21 @@ a {
     flex-direction: column;
   }
 
+  .pet-info-grid {
+    grid-template-columns: 1fr;
+  }
+
   .admin-stats-grid,
+  .admin-alert-grid,
   .module-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-filter-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-card-filter {
     grid-template-columns: 1fr;
   }
 
@@ -760,6 +1236,15 @@ a {
 
   .stat-value {
     font-size: 24px;
+  }
+
+  .dashboard-pet-card {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-pet-photo {
+    width: 100%;
+    height: 180px;
   }
 
   .admin-actions-cell,

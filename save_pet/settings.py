@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'apps.vaccines',
     'apps.locator',
     'apps.blog',
+    'apps.adminpanel',
 ]
 
 MIDDLEWARE = [

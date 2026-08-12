@@ -28,10 +28,10 @@
                         </div>
                         <span class="pet-badge">OK</span>
                     </div>
-                    <div class="row g-2 mt-3 mb-4">
-                        <div class="col-4"><div class="mini-panel text-center"><small class="d-block text-muted">Sexo</small><strong>{{ pet.sexo }}</strong></div></div>
-                        <div class="col-4"><div class="mini-panel text-center"><small class="d-block text-muted">Peso</small><strong>{{ pet.peso }} kg</strong></div></div>
-                        <div class="col-4"><div class="mini-panel text-center"><small class="d-block text-muted">Pelagem</small><strong>{{ pet.pelagem|truncatechars:8 }}</strong></div></div>
+                    <div class="pet-card-info-grid mt-3 mb-4">
+                        <div class="mini-panel"><small class="d-block text-muted">Sexo</small><strong>{{ pet.sexo }}</strong></div>
+                        <div class="mini-panel"><small class="d-block text-muted">Peso</small><strong>{{ pet.peso }} kg</strong></div>
+                        <div class="mini-panel pet-card-info-wide"><small class="d-block text-muted">Pelagem</small><strong>{{ pet.pelagem }}</strong></div>
                     </div>
                     <a href="{% url 'pets:detail' pet.id %}" class="pet-btn-primary w-100">Ver perfil →</a>
                 </div>

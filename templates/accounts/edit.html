@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Editar usuário - SavePet{% endblock %}
+{% block title %}{% if is_edit %}Editar usuário{% else %}Novo usuário{% endif %} - SavePet{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div>
-        <h1 class="page-title">Editar usuário</h1>
-        <p class="page-subtitle">Atualize dados de acesso e permissões.</p>
+        <h1 class="page-title">{% if is_edit %}Editar usuário{% else %}Novo usuário{% endif %}</h1>
+        <p class="page-subtitle">{% if is_edit %}Atualize dados de acesso e permissões.{% else %}Crie um usuário administrativo sem trocar a sessão atual.{% endif %}</p>
     </div>
     <a href="{% url 'accounts:users' %}" class="pet-btn-secondary">Cancelar</a>
 </div>
@@ -31,6 +31,6 @@
             {% endfor %}
         </div>
     </div>
-    <button type="submit" class="pet-btn-primary mt-4">Salvar usuário</button>
+    <button type="submit" class="pet-btn-primary mt-4">{% if is_edit %}Salvar usuário{% else %}Criar usuário{% endif %}</button>
 </form>
 {% endblock %}

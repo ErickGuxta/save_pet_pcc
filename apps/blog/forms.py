@@ -35,11 +35,20 @@ class ArtigoBlogForm(forms.ModelForm):
             "tempo_leitura": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
             "status": forms.Select(attrs={"class": "form-select"}),
             "data_publicacao": forms.DateTimeInput(
-                attrs={"class": "form-control", "type": "datetime-local"},
-                format="%Y-%m-%dT%H:%M",
+                attrs={
+                    "class": "form-control datetime-br-input",
+                    "data-datetime-br": "true",
+                    "inputmode": "numeric",
+                    "maxlength": "16",
+                    "pattern": r"\d{2}/\d{2}/\d{4} \d{2}:\d{2}",
+                    "placeholder": "dd/mm/aaaa hh:mm",
+                    "autocomplete": "off",
+                },
+                format="%d/%m/%Y %H:%M",
             ),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["data_publicacao"].input_formats = ["%Y-%m-%dT%H:%M"]
+        self.fields["data_publicacao"].input_formats = ["%d/%m/%Y %H:%M", "%Y-%m-%dT%H:%M"]
+        self.fields["data_publicacao"].error_messages["invalid"] = "Informe data e hora no formato dd/mm/aaaa hh:mm."

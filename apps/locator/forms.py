@@ -16,8 +16,16 @@ class RastreadorForm(forms.ModelForm):
         ]
         widgets = {
             "data_vinculacao": forms.DateTimeInput(
-                attrs={"type": "datetime-local"},
-                format="%Y-%m-%dT%H:%M",
+                attrs={
+                    "class": "form-control datetime-br-input",
+                    "data-datetime-br": "true",
+                    "inputmode": "numeric",
+                    "maxlength": "16",
+                    "pattern": r"\d{2}/\d{2}/\d{4} \d{2}:\d{2}",
+                    "placeholder": "dd/mm/aaaa hh:mm",
+                    "autocomplete": "off",
+                },
+                format="%d/%m/%Y %H:%M",
             )
         }
 
@@ -39,7 +47,17 @@ class RastreadorForm(forms.ModelForm):
             field.widget.attrs.update({"class": "form-control"})
 
         self.fields["pet"].widget.attrs.update({"class": "form-select"})
-        self.fields["data_vinculacao"].input_formats = ["%Y-%m-%dT%H:%M"]
+        self.fields["data_vinculacao"].input_formats = ["%d/%m/%Y %H:%M", "%Y-%m-%dT%H:%M"]
+        self.fields["data_vinculacao"].error_messages["invalid"] = "Informe data e hora no formato dd/mm/aaaa hh:mm."
+        self.fields["data_vinculacao"].widget.attrs.update({
+            "class": "form-control datetime-br-input",
+            "data-datetime-br": "true",
+            "inputmode": "numeric",
+            "maxlength": "16",
+            "pattern": r"\d{2}/\d{2}/\d{4} \d{2}:\d{2}",
+            "placeholder": "dd/mm/aaaa hh:mm",
+            "autocomplete": "off",
+        })
 
 
 class LocalizacaoForm(forms.ModelForm):
@@ -52,8 +70,16 @@ class LocalizacaoForm(forms.ModelForm):
         ]
         widgets = {
             "timestamp": forms.DateTimeInput(
-                attrs={"type": "datetime-local"},
-                format="%Y-%m-%dT%H:%M",
+                attrs={
+                    "class": "form-control datetime-br-input",
+                    "data-datetime-br": "true",
+                    "inputmode": "numeric",
+                    "maxlength": "16",
+                    "pattern": r"\d{2}/\d{2}/\d{4} \d{2}:\d{2}",
+                    "placeholder": "dd/mm/aaaa hh:mm",
+                    "autocomplete": "off",
+                },
+                format="%d/%m/%Y %H:%M",
             )
         }
 
@@ -63,4 +89,14 @@ class LocalizacaoForm(forms.ModelForm):
         for field in self.fields.values():
             field.widget.attrs.update({"class": "form-control"})
 
-        self.fields["timestamp"].input_formats = ["%Y-%m-%dT%H:%M"]
+        self.fields["timestamp"].input_formats = ["%d/%m/%Y %H:%M", "%Y-%m-%dT%H:%M"]
+        self.fields["timestamp"].error_messages["invalid"] = "Informe data e hora no formato dd/mm/aaaa hh:mm."
+        self.fields["timestamp"].widget.attrs.update({
+            "class": "form-control datetime-br-input",
+            "data-datetime-br": "true",
+            "inputmode": "numeric",
+            "maxlength": "16",
+            "pattern": r"\d{2}/\d{2}/\d{4} \d{2}:\d{2}",
+            "placeholder": "dd/mm/aaaa hh:mm",
+            "autocomplete": "off",
+        })

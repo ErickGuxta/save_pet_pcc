@@ -16,9 +16,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import get_user_model, login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
+from django.db.models import Q
 
 from apps.locator.models import Rastreador
 from apps.pets.models import Pet
+from apps.pets.status import build_pet_statuses
 from apps.vaccines.models import Vaccine
 from apps.blog.models import ArtigoBlog
 
@@ -40,14 +42,17 @@ def is_admin(user):
 
 @login_required
 def dashboard(request):
-    pets = Pet.objects.filter(usuario=request.user)
+    pets = Pet.objects.filter(usuario=request.user).prefetch_related("vacinas").select_related("rastreador")
     vaccines = Vaccine.objects.filter(usuario=request.user).select_related("pet")
     trackers = Rastreador.objects.filter(pet__usuario=request.user)
     upcoming_vaccines = vaccines.exclude(data_reforco__isnull=True).order_by("data_reforco")[:4]
     recent_articles = ArtigoBlog.objects.filter(status=ArtigoBlog.STATUS_PUBLICADO).select_related("categoria", "usuario")[:3]
+    dashboard_pets = list(pets[:5])
+    for pet in dashboard_pets:
+        pet.status_indicators = build_pet_statuses(pet)
 
     context = {
-        "pets": pets[:5],
+        "pets": dashboard_pets,
         "total_pets": pets.count(),
         "total_vaccines": vaccines.count(),
         "total_trackers": trackers.count(),
@@ -176,14 +181,56 @@ def profile(request):
 @user_passes_test(is_admin)
 def users(request):
 
-    users = User.objects.all()
+    users = User.objects.all().order_by("-date_joined")
+    search = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "todos")
+
+    if search:
+        users = users.filter(
+            Q(username__icontains=search)
+            | Q(email__icontains=search)
+            | Q(first_name__icontains=search)
+            | Q(last_name__icontains=search)
+        )
+
+    if status == "ativos":
+        users = users.filter(is_active=True)
+    elif status == "inativos":
+        users = users.filter(is_active=False)
+    elif status == "admins":
+        users = users.filter(is_superuser=True)
 
     context = {
         "users": users,
+        "search": search,
+        "status": status,
     }
 
     #retorno a request, o caminho template e o contexto
     return render(request, "accounts/index.html", context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def user_create(request):
+    form = UserForm()
+
+    if request.method == "POST":
+        form = UserForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Usuário criado com sucesso.")
+            return redirect("accounts:users")
+
+    return render(
+        request,
+        "accounts/edit.html",
+        {
+            "is_edit": False,
+            "form": form,
+        },
+    )
 
 #detalhar users
 @login_required
@@ -212,7 +259,29 @@ def edit(request, id):
         form = UserForm(request.POST, instance=user)
 
         if form.is_valid():
+            is_last_superuser = (
+                user.is_superuser
+                and User.objects.filter(is_superuser=True).exclude(pk=user.pk).count() == 0
+            )
+
+            if user == request.user and not form.cleaned_data.get("is_active"):
+                messages.error(request, "Você não pode desativar a própria conta.")
+                return render(request, "accounts/edit.html", {"is_edit": True, "form": form, "user": user})
+
+            if user == request.user and not form.cleaned_data.get("is_superuser"):
+                messages.error(request, "Você não pode remover seu próprio acesso de administrador.")
+                return render(request, "accounts/edit.html", {"is_edit": True, "form": form, "user": user})
+
+            if is_last_superuser and not form.cleaned_data.get("is_superuser"):
+                messages.error(request, "Não é possível remover o último superusuário do sistema.")
+                return render(request, "accounts/edit.html", {"is_edit": True, "form": form, "user": user})
+
+            if is_last_superuser and not form.cleaned_data.get("is_active"):
+                messages.error(request, "Não é possível desativar o último superusuário do sistema.")
+                return render(request, "accounts/edit.html", {"is_edit": True, "form": form, "user": user})
+
             form.save()
+            messages.success(request, "Usuário atualizado com sucesso.")
             return redirect("accounts:users")
         else:
             context = {
@@ -238,8 +307,17 @@ def delete(request, id):
 
     user = get_object_or_404(User, id=id)
 
+    if user == request.user:
+        messages.error(request, "Você não pode excluir a própria conta de administrador.")
+        return redirect("accounts:users")
+
+    if user.is_superuser and User.objects.filter(is_superuser=True).exclude(pk=user.pk).count() == 0:
+        messages.error(request, "Não é possível excluir o último superusuário do sistema.")
+        return redirect("accounts:users")
+
     if request.method == "POST":
         user.delete()
+        messages.success(request, "Usuário excluído com sucesso.")
         return redirect("accounts:users")
 
     context = {

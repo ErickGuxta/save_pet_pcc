@@ -8,8 +8,28 @@
         <h1 class="page-title">Usuários</h1>
         <p class="page-subtitle">Gerenciamento administrativo de tutores e permissões.</p>
     </div>
-    <a href="{% url 'accounts:create' %}" class="pet-btn-primary">+ Novo usuário</a>
+    <a href="{% url 'accounts:user_create' %}" class="pet-btn-primary">+ Novo usuário</a>
 </div>
+
+<form method="get" class="pet-card admin-filter-bar mb-4">
+    <div>
+        <label class="form-label" for="user-search">Buscar</label>
+        <input id="user-search" class="form-control" type="search" name="q" value="{{ search }}" placeholder="Nome, usuário ou e-mail">
+    </div>
+    <div>
+        <label class="form-label" for="user-status">Status</label>
+        <select id="user-status" class="form-select" name="status">
+            <option value="todos" {% if status == "todos" %}selected{% endif %}>Todos</option>
+            <option value="ativos" {% if status == "ativos" %}selected{% endif %}>Ativos</option>
+            <option value="inativos" {% if status == "inativos" %}selected{% endif %}>Inativos</option>
+            <option value="admins" {% if status == "admins" %}selected{% endif %}>Administradores</option>
+        </select>
+    </div>
+    <div class="admin-filter-actions">
+        <button type="submit" class="pet-btn-primary">Filtrar</button>
+        <a href="{% url 'accounts:users' %}" class="pet-btn-secondary">Limpar</a>
+    </div>
+</form>
 
 <div class="pet-card p-0">
     <div class="table-wrap">
@@ -39,7 +59,9 @@
                         <td class="text-end">
                             <a href="{% url 'accounts:detail' item.id %}" class="pet-btn-ghost">Ver</a>
                             <a href="{% url 'accounts:edit' item.id %}" class="pet-btn-ghost">Editar</a>
-                            <a href="{% url 'accounts:delete' item.id %}" class="pet-btn-ghost pet-btn-danger">Excluir</a>
+                            {% if item.id != request.user.id %}
+                                <a href="{% url 'accounts:delete' item.id %}" class="pet-btn-ghost pet-btn-danger">Excluir</a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% empty %}

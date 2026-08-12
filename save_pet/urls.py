@@ -4,13 +4,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from apps.accounts  import views
-from apps.blog import views as blog_views
 
 urlpatterns = [
     path('admin/'           , admin.site.urls),
 
     path(''                 , views.dashboard, name="dashboard"),
-    path('painel-admin/'    , blog_views.admin_panel, name="admin_panel"),
+    path('painel-admin/'    , include("apps.adminpanel.urls")),
     path('access/'          , include("django.contrib.auth.urls")),
 
     path('users/'           , include("apps.accounts.urls")),

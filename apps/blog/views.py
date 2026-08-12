@@ -1,17 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth import get_user_model
 from django.db.models import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 
-from apps.locator.models import Localizacao, Rastreador
-from apps.pets.models import Pet
-from apps.vaccines.models import Vaccine
-
 from .forms import ArtigoBlogForm, CategoriaForm
 from .models import ArtigoBlog, Categoria
-
-User = get_user_model()
 
 
 def is_admin(user):
@@ -62,36 +55,6 @@ def article_detail(request, slug):
 
 @login_required
 @user_passes_test(is_admin)
-def admin_panel(request):
-    users = User.objects.all().order_by("-date_joined")
-    pets = Pet.objects.select_related("usuario").all()
-    vaccines = Vaccine.objects.select_related("pet", "usuario").all()
-    trackers = Rastreador.objects.select_related("pet", "pet__usuario").all()
-    locations = Localizacao.objects.select_related("rastreador", "rastreador__pet").all()[:8]
-    categories = Categoria.objects.all()
-    articles = ArtigoBlog.objects.select_related("categoria", "usuario").all()
-
-    context = {
-        "users": users[:8],
-        "pets": pets[:8],
-        "vaccines": vaccines[:8],
-        "trackers": trackers[:8],
-        "locations": locations,
-        "categories": categories[:8],
-        "articles": articles[:8],
-        "total_users": users.count(),
-        "total_pets": pets.count(),
-        "total_vaccines": vaccines.count(),
-        "total_trackers": trackers.count(),
-        "total_locations": Localizacao.objects.count(),
-        "total_categories": categories.count(),
-        "total_articles": articles.count(),
-    }
-    return render(request, "blog/admin_panel.html", context)
-
-
-@login_required
-@user_passes_test(is_admin)
 def category_create(request):
     form = CategoriaForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -132,10 +95,8 @@ def category_delete(request, id):
 def article_create(request):
     form = ArtigoBlogForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        article = form.save(commit=False)
-        article.usuario = request.user
-        article.save()
-        messages.success(request, "Artigo criado com sucesso.")
+        article = _save_article_form(form, request)
+        messages.success(request, _article_success_message(article, "criado"))
         return redirect("admin_panel")
     return render(request, "blog/article_form.html", {"form": form, "title": "Novo artigo"})
 
@@ -146,10 +107,27 @@ def article_edit(request, id):
     article = get_object_or_404(ArtigoBlog, id=id)
     form = ArtigoBlogForm(request.POST or None, instance=article)
     if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "Artigo atualizado com sucesso.")
+        article = _save_article_form(form, request)
+        messages.success(request, _article_success_message(article, "atualizado"))
         return redirect("admin_panel")
     return render(request, "blog/article_form.html", {"form": form, "title": "Editar artigo"})
+
+
+def _save_article_form(form, request):
+    article = form.save(commit=False)
+    if not article.pk:
+        article.usuario = request.user
+    if request.POST.get("save_as") == "draft":
+        article.status = ArtigoBlog.STATUS_RASCUNHO
+    article.save()
+    form.save_m2m()
+    return article
+
+
+def _article_success_message(article, action):
+    if article.status == ArtigoBlog.STATUS_RASCUNHO:
+        return f"Artigo {action} como rascunho."
+    return f"Artigo {action} com sucesso."
 
 
 @login_required

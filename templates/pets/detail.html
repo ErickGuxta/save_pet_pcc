@@ -16,7 +16,9 @@
             <div class="d-flex gap-2 flex-wrap mt-2">
                 <span class="pet-badge">{{ pet.especie }}</span>
                 <span class="pet-badge warning">{{ pet.raca }}</span>
-                <span class="pet-badge">Saudável</span>
+                {% for status in pet_statuses %}
+                    <span class="pet-badge {% if status.style == 'warning' %}warning{% elif status.style == 'danger' %}danger{% elif status.style == 'muted' %}muted{% endif %}">{{ status.label }}</span>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -26,30 +28,84 @@
     </div>
 </div>
 
-<div class="row g-4">
-    <div class="col-xl-7">
+<div class="row g-4 pet-detail-layout">
+    <div class="col-xl-8">
         <div class="pet-card mb-4">
             <h2 class="h5 mb-4">Informações gerais</h2>
-            <dl class="row mb-0">
-                <dt class="col-sm-4">Espécie</dt><dd class="col-sm-8">{{ pet.especie }}</dd>
-                <dt class="col-sm-4">Raça</dt><dd class="col-sm-8">{{ pet.raca }}</dd>
-                <dt class="col-sm-4">Sexo</dt><dd class="col-sm-8">{{ pet.sexo }}</dd>
-                <dt class="col-sm-4">Nascimento</dt><dd class="col-sm-8">{{ pet.data_nascimento|date:"d/m/Y" }}</dd>
-                <dt class="col-sm-4">Pelagem</dt><dd class="col-sm-8">{{ pet.pelagem }}</dd>
-                <dt class="col-sm-4">Peso</dt><dd class="col-sm-8">{{ pet.peso }} kg</dd>
-            </dl>
+            <div class="pet-info-grid">
+                <div class="pet-info-item">
+                    <span>Espécie</span>
+                    <strong>{{ pet.especie }}</strong>
+                </div>
+                <div class="pet-info-item">
+                    <span>Raça</span>
+                    <strong>{{ pet.raca }}</strong>
+                </div>
+                <div class="pet-info-item">
+                    <span>Sexo</span>
+                    <strong>{{ pet.sexo }}</strong>
+                </div>
+                <div class="pet-info-item">
+                    <span>Nascimento</span>
+                    <strong>{{ pet.data_nascimento|date:"d/m/Y" }}</strong>
+                </div>
+                <div class="pet-info-item">
+                    <span>Pelagem</span>
+                    <strong>{{ pet.pelagem }}</strong>
+                </div>
+                <div class="pet-info-item">
+                    <span>Peso</span>
+                    <strong>{{ pet.peso }} kg</strong>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="col-xl-5">
+    <div class="col-xl-4">
         <div class="pet-card">
             <h2 class="h5 mb-4">Saúde e histórico</h2>
-            <dl class="mb-0">
-                <dt>Alergias</dt><dd class="text-muted">{{ pet.alergias|default:"Nenhuma informação cadastrada." }}</dd>
-                <dt>Doenças</dt><dd class="text-muted">{{ pet.doencas|default:"Nenhuma informação cadastrada." }}</dd>
-                <dt>Medicamentos</dt><dd class="text-muted">{{ pet.medicamentos|default:"Nenhuma informação cadastrada." }}</dd>
-                <dt>Observações</dt><dd class="text-muted mb-0">{{ pet.observacoes|default:"Nenhuma observação." }}</dd>
-            </dl>
+            <div class="pet-health-list">
+                <div class="pet-health-item">
+                    <span>Alergias</span>
+                    <p>{{ pet.alergias|default:"Nenhuma informação cadastrada." }}</p>
+                </div>
+                <div class="pet-health-item">
+                    <span>Doenças</span>
+                    <p>{{ pet.doencas|default:"Nenhuma informação cadastrada." }}</p>
+                </div>
+                <div class="pet-health-item">
+                    <span>Medicamentos</span>
+                    <p>{{ pet.medicamentos|default:"Nenhuma informação cadastrada." }}</p>
+                </div>
+                <div class="pet-health-item">
+                    <span>Observações</span>
+                    <p>{{ pet.observacoes|default:"Nenhuma observação." }}</p>
+                </div>
+            </div>
         </div>
+    </div>
+</div>
+
+<div class="pet-card mt-4">
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h2 class="h5 mb-1">Linha do tempo</h2>
+            <p class="text-muted small mb-0">Histórico de saúde, vacinação e rastreamento do pet.</p>
+        </div>
+        <a href="{% url 'vaccines:create' %}" class="pet-btn-ghost">Adicionar vacina</a>
+    </div>
+    <div class="pet-timeline">
+        {% for event in timeline_events %}
+            <div class="pet-timeline-item">
+                <span class="pet-timeline-marker {{ event.kind }}"></span>
+                <div class="pet-timeline-content">
+                    <span class="pet-timeline-date">{{ event.date_label }}</span>
+                    <strong>{{ event.title }}</strong>
+                    <p>{{ event.description }}</p>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-muted mb-0">Nenhum evento registrado.</p>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

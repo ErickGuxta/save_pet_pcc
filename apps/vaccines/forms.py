@@ -29,5 +29,19 @@ class VaccineForm(forms.ModelForm):
             field.widget.attrs.update({"class": "form-control"})
 
         self.fields["pet"].widget.attrs.update({"class": "form-select"})
-        self.fields["data_aplicacao"].widget.input_type = "date"
-        self.fields["data_reforco"].widget.input_type = "date"
+
+        for field_name in ["data_aplicacao", "data_reforco"]:
+            self.fields[field_name].input_formats = ["%d/%m/%Y", "%Y-%m-%d"]
+            self.fields[field_name].error_messages["invalid"] = "Informe a data no formato dd/mm/aaaa."
+            self.fields[field_name].widget = forms.DateInput(
+                format="%d/%m/%Y",
+                attrs={
+                    "class": "form-control date-br-input",
+                    "data-date-br": "true",
+                    "inputmode": "numeric",
+                    "maxlength": "10",
+                    "pattern": r"\d{2}/\d{2}/\d{4}",
+                    "placeholder": "dd/mm/aaaa",
+                    "autocomplete": "off",
+                },
+            )
