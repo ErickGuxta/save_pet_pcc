@@ -92,6 +92,26 @@ def category_delete(request, id):
 
 @login_required
 @user_passes_test(is_admin)
+def article_preview(request, id):
+    article = get_object_or_404(
+        ArtigoBlog.objects.select_related("categoria", "usuario"),
+        id=id,
+    )
+    related = (
+        ArtigoBlog.objects.filter(status=ArtigoBlog.STATUS_PUBLICADO, categoria=article.categoria)
+        .exclude(id=article.id)
+        .select_related("categoria")[:2]
+    )
+    context = {
+        "article": article,
+        "related": related,
+        "is_admin_preview": True,
+    }
+    return render(request, "blog/detail.html", context)
+
+
+@login_required
+@user_passes_test(is_admin)
 def article_create(request):
     form = ArtigoBlogForm(request.POST or None)
     if request.method == "POST" and form.is_valid():

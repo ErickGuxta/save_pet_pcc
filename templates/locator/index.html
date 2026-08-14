@@ -1,6 +1,15 @@
 {% extends "base.html" %}
+{% load l10n %}
 
 {% block title %}Localizador - SavePet{% endblock %}
+
+{% block extra_head %}
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin="">
+{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -30,75 +39,241 @@
     </div>
     <div class="col-xl-8">
         <div class="pet-card mb-4">
-            <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap mb-4">
                 <div>
                     <h2 class="h5 mb-1">Mapa do localizador</h2>
-                    <p class="text-muted small mb-0">
-                        {% if ultima_localizacao %}
-                            Última posição de {{ ultima_localizacao.rastreador.pet.nome }} em {{ ultima_localizacao.timestamp|date:"d/m/Y H:i" }}.
-                        {% else %}
-                            Registre uma localização para visualizar o mapa.
-                        {% endif %}
-                    </p>
+                    <p class="text-muted small mb-0">Selecione o pet para acompanhar a coleira simulada.</p>
                 </div>
-                {% if ultima_localizacao %}
-                    <span class="pet-badge">{{ ultima_localizacao.latitude }}, {{ ultima_localizacao.longitude }}</span>
-                {% endif %}
+                <span class="pet-badge" id="locator-index-status">Aguardando seleção</span>
             </div>
-            {% if ultima_localizacao %}
-                <iframe
-                    class="map-embed"
-                    title="Mapa geral dos rastreadores"
-                    src="https://www.openstreetmap.org/export/embed.html?bbox={{ map_bbox.min_lng }}%2C{{ map_bbox.min_lat }}%2C{{ map_bbox.max_lng }}%2C{{ map_bbox.max_lat }}&layer=mapnik&marker={{ ultima_localizacao.latitude }}%2C{{ ultima_localizacao.longitude }}">
-                </iframe>
-            {% else %}
-                <div class="map-panel">Mapa aguardando coordenadas do rastreador.</div>
-            {% endif %}
-        </div>
 
-        <div class="pet-card p-0">
-            <div class="table-wrap">
-                <table class="savepet-table">
-                    <thead>
-                        <tr>
-                            <th>Pet</th>
-                            <th>Identificador</th>
-                            <th>Modelo</th>
-                            <th>Última localização</th>
-                            <th class="text-end">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <div class="locator-map-toolbar mb-3">
+                <div>
+                    <label class="form-label" for="tracker-select">Pet</label>
+                    <select class="form-select" id="tracker-select" {% if not rastreadores %}disabled{% endif %}>
                         {% for rastreador in rastreadores %}
                             {% with ultima=rastreador.ultima_localizacao %}
-                                <tr>
-                                    <td><strong>{{ rastreador.pet.nome }}</strong></td>
-                                    <td>{{ rastreador.identificador }}</td>
-                                    <td class="text-muted">{{ rastreador.modelo }}</td>
-                                    <td>
-                                        {% if ultima %}
-                                            <span class="pet-badge">{{ ultima.latitude }}, {{ ultima.longitude }}</span>
-                                            <span class="text-muted small d-block">{{ ultima.timestamp|date:"d/m/Y H:i" }}</span>
-                                        {% else %}
-                                            <span class="text-muted">Sem localização</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-end">
-                                        <a href="{% url 'locator:detail' rastreador.id %}" class="pet-btn-ghost">Ver</a>
-                                        <a href="{% url 'locator:edit' rastreador.id %}" class="pet-btn-ghost">Editar</a>
-                                        <a href="{% url 'locator:delete' rastreador.id %}" class="pet-btn-ghost pet-btn-danger">Excluir</a>
-                                    </td>
-                                </tr>
+                                <option
+                                    value="{{ rastreador.id }}"
+                                    data-latest-url="{% url 'locator:ultima_localizacao_api' rastreador.id %}"
+                                    data-detail-url="{% url 'locator:detail' rastreador.id %}"
+                                    data-pet-name="{{ rastreador.pet.nome|escape }}"
+                                    data-identifier="{{ rastreador.identificador|escape }}"
+                                    data-initial-latitude="{% if ultima %}{{ ultima.latitude|unlocalize }}{% else %}-14.2231{% endif %}"
+                                    data-initial-longitude="{% if ultima %}{{ ultima.longitude|unlocalize }}{% else %}-42.7799{% endif %}">
+                                    {{ rastreador.pet.nome }} - {{ rastreador.identificador }}
+                                </option>
                             {% endwith %}
                         {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-4">Nenhum rastreador vinculado.</td>
-                            </tr>
+                            <option>Nenhum rastreador vinculado</option>
                         {% endfor %}
-                    </tbody>
-                </table>
+                    </select>
+                </div>
+
+                <div class="locator-current">
+                    <div class="mini-panel"><small class="d-block text-muted">Latitude</small><strong id="locator-index-latitude">-</strong></div>
+                    <div class="mini-panel"><small class="d-block text-muted">Longitude</small><strong id="locator-index-longitude">-</strong></div>
+                    <div class="mini-panel"><small class="d-block text-muted">Atualizado</small><strong id="locator-index-timestamp">-</strong></div>
+                </div>
+            </div>
+
+            <div id="locator-index-map" class="live-map"></div>
+
+            <div class="d-flex gap-3 flex-wrap mt-4">
+                <a class="pet-btn-secondary" id="tracker-detail-link" href="#">Ver detalhes</a>
+                <span class="pet-badge muted">Atualiza a cada 2 segundos</span>
             </div>
         </div>
     </div>
 </div>
+
+<div class="pet-card p-0 locator-list-card mt-4">
+    <div class="locator-list-header">
+        <div>
+            <h2 class="h5 mb-1">Rastreadores vinculados</h2>
+            <p class="text-muted small mb-0">Resumo das coleiras cadastradas e suas últimas coordenadas.</p>
+        </div>
+    </div>
+    <div class="table-wrap locator-table-wrap">
+        <table class="savepet-table locator-table">
+            <thead>
+                <tr>
+                    <th>Pet</th>
+                    <th>Identificador</th>
+                    <th>Modelo</th>
+                    <th>Última localização</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rastreador in rastreadores %}
+                    {% with ultima=rastreador.ultima_localizacao %}
+                        <tr>
+                            <td class="locator-name-cell" data-label="Pet"><strong>{{ rastreador.pet.nome }}</strong></td>
+                            <td class="locator-identifier-cell" data-label="Identificador">{{ rastreador.identificador }}</td>
+                            <td class="text-muted locator-model-cell" data-label="Modelo">{{ rastreador.modelo }}</td>
+                            <td class="locator-location-cell" data-label="Última localização">
+                                {% if ultima %}
+                                    <span class="pet-badge locator-coordinate-badge">{{ ultima.latitude }}, {{ ultima.longitude }}</span>
+                                    <span class="text-muted small d-block">{{ ultima.timestamp|date:"d/m/Y H:i" }}</span>
+                                {% else %}
+                                    <span class="text-muted">Sem localização</span>
+                                {% endif %}
+                            </td>
+                            <td class="locator-actions-cell" data-label="Ações">
+                                <div class="locator-action-list">
+                                    <a href="{% url 'locator:detail' rastreador.id %}" class="pet-btn-ghost">Ver</a>
+                                    <a href="{% url 'locator:edit' rastreador.id %}" class="pet-btn-ghost">Editar</a>
+                                    <a href="{% url 'locator:delete' rastreador.id %}" class="pet-btn-ghost pet-btn-danger">Excluir</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endwith %}
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="locator-empty-cell text-center text-muted py-4">Nenhum rastreador vinculado.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin="">
+</script>
+<script>
+    (function () {
+        var mapElement = document.getElementById("locator-index-map");
+        var selectElement = document.getElementById("tracker-select");
+        if (!mapElement || !selectElement || typeof L === "undefined") return;
+
+        var latitudeEl = document.getElementById("locator-index-latitude");
+        var longitudeEl = document.getElementById("locator-index-longitude");
+        var timestampEl = document.getElementById("locator-index-timestamp");
+        var statusEl = document.getElementById("locator-index-status");
+        var detailLink = document.getElementById("tracker-detail-link");
+        var marker = null;
+        var routeLine = null;
+        var timer = null;
+
+        var map = L.map("locator-index-map").setView([-14.2231, -42.7799], 15);
+
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: "&copy; OpenStreetMap contributors"
+        }).addTo(map);
+
+        function selectedOption() {
+            return selectElement.options[selectElement.selectedIndex];
+        }
+
+        function setStatus(message, className) {
+            statusEl.textContent = message;
+            statusEl.classList.remove("warning", "danger", "muted");
+            if (className) statusEl.classList.add(className);
+        }
+
+        function updateRoute(points) {
+            var latLngs = points.map(function (point) {
+                return [point.latitude, point.longitude];
+            });
+
+            if (!latLngs.length) {
+                if (routeLine) routeLine.setLatLngs([]);
+                return;
+            }
+
+            if (!routeLine) {
+                routeLine = L.polyline(latLngs, {
+                    color: "#5fb8a8",
+                    weight: 4,
+                    opacity: 0.75
+                }).addTo(map);
+            } else {
+                routeLine.setLatLngs(latLngs);
+            }
+        }
+
+        function updateMarker(localizacao, historico, petName) {
+            var latitude = Number(localizacao.latitude);
+            var longitude = Number(localizacao.longitude);
+            var latLng = [latitude, longitude];
+
+            if (!marker) {
+                marker = L.marker(latLng).addTo(map).bindPopup(petName);
+            } else {
+                marker.setLatLng(latLng);
+                marker.bindPopup(petName);
+            }
+
+            marker.openPopup();
+            map.panTo(latLng);
+            latitudeEl.textContent = latitude.toFixed(7);
+            longitudeEl.textContent = longitude.toFixed(7);
+            timestampEl.textContent = localizacao.timestamp_formatado;
+            setStatus("Online");
+            updateRoute(historico || []);
+        }
+
+        function resetReadout(option) {
+            var latitude = Number(option.dataset.initialLatitude || "-14.2231");
+            var longitude = Number(option.dataset.initialLongitude || "-42.7799");
+            latitudeEl.textContent = "-";
+            longitudeEl.textContent = "-";
+            timestampEl.textContent = "-";
+            setStatus("Buscando coordenadas", "muted");
+            detailLink.href = option.dataset.detailUrl || "#";
+            map.setView([latitude, longitude], 15);
+            if (marker) {
+                marker.remove();
+                marker = null;
+            }
+            updateRoute([]);
+        }
+
+        function fetchLatestLocation() {
+            var option = selectedOption();
+            if (!option || !option.dataset.latestUrl) {
+                setStatus("Sem rastreador", "muted");
+                detailLink.href = "#";
+                return;
+            }
+
+            fetch(option.dataset.latestUrl, {
+                headers: {
+                    "Accept": "application/json"
+                }
+            })
+                .then(function (response) {
+                    if (!response.ok) throw new Error("Falha ao consultar localizacao.");
+                    return response.json();
+                })
+                .then(function (data) {
+                    if (!data.localizacao) {
+                        setStatus("Sem coordenadas", "muted");
+                        return;
+                    }
+                    updateMarker(data.localizacao, data.historico, option.dataset.petName || "Pet");
+                })
+                .catch(function () {
+                    setStatus("Conexao instavel", "warning");
+                });
+        }
+
+        function startPolling() {
+            window.clearInterval(timer);
+            resetReadout(selectedOption());
+            fetchLatestLocation();
+            timer = window.setInterval(fetchLatestLocation, 2000);
+        }
+
+        selectElement.addEventListener("change", startPolling);
+        startPolling();
+    })();
+</script>
 {% endblock %}

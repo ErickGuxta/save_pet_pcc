@@ -60,3 +60,35 @@ class ArticleDraftSaveTests(TestCase):
         article.refresh_from_db()
         self.assertEqual(article.titulo, "Artigo revisado")
         self.assertEqual(article.status, ArtigoBlog.STATUS_RASCUNHO)
+
+    def test_admin_can_preview_draft_article(self):
+        article = ArtigoBlog.objects.create(
+            usuario=self.admin,
+            categoria=self.category,
+            titulo="Rascunho interno",
+            resumo="Resumo",
+            conteudo="Conteúdo em revisão",
+            tempo_leitura=3,
+            status=ArtigoBlog.STATUS_RASCUNHO,
+        )
+
+        response = self.client.get(reverse("blog:article_preview", args=[article.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Rascunho interno")
+        self.assertContains(response, "Visualização administrativa")
+
+    def test_draft_article_stays_hidden_from_public_detail(self):
+        article = ArtigoBlog.objects.create(
+            usuario=self.admin,
+            categoria=self.category,
+            titulo="Rascunho publico bloqueado",
+            resumo="Resumo",
+            conteudo="Conteúdo em revisão",
+            tempo_leitura=3,
+            status=ArtigoBlog.STATUS_RASCUNHO,
+        )
+
+        response = self.client.get(reverse("blog:detail", args=[article.slug]))
+
+        self.assertEqual(response.status_code, 404)

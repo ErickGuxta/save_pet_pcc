@@ -2,12 +2,15 @@ from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+from .forms import AdminPetForm
 from apps.blog.models import ArtigoBlog, Categoria
 from apps.locator.models import Localizacao, Rastreador
 from apps.pets.models import Pet
+from apps.pets.status import build_pet_statuses, build_pet_timeline
 from apps.vaccines.models import Vaccine
 
 User = get_user_model()
@@ -77,3 +80,70 @@ def index(request):
         "article_category": article_category,
     }
     return render(request, "adminpanel/index.html", context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def pets(request):
+    search = request.GET.get("q", "").strip()
+    pets_queryset = Pet.objects.select_related("usuario").order_by("nome")
+
+    if search:
+        pets_queryset = pets_queryset.filter(nome__icontains=search)
+
+    context = {
+        "pets": pets_queryset,
+        "search": search,
+        "total_pets": pets_queryset.count(),
+    }
+    return render(request, "adminpanel/pets.html", context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def pet_detail(request, id):
+    pet = get_object_or_404(
+        Pet.objects.select_related("usuario").prefetch_related("vacinas"),
+        id=id,
+    )
+    context = {
+        "pet": pet,
+        "pet_statuses": build_pet_statuses(pet),
+        "timeline_events": build_pet_timeline(pet),
+    }
+    return render(request, "adminpanel/pet_detail.html", context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def pet_edit(request, id):
+    pet = get_object_or_404(Pet.objects.select_related("usuario"), id=id)
+    form = AdminPetForm(instance=pet)
+
+    if request.method == "POST":
+        form = AdminPetForm(request.POST, request.FILES, instance=pet)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Pet atualizado com sucesso pelo painel admin.")
+            return redirect("admin_pets")
+
+    context = {
+        "form": form,
+        "pet": pet,
+    }
+    return render(request, "adminpanel/pet_form.html", context)
+
+
+@login_required
+@user_passes_test(is_admin)
+def pet_delete(request, id):
+    pet = get_object_or_404(Pet.objects.select_related("usuario"), id=id)
+
+    if request.method == "POST":
+        pet_nome = pet.nome
+        pet.delete()
+        messages.success(request, f"Pet {pet_nome} excluido com sucesso.")
+        return redirect("admin_pets")
+
+    return render(request, "adminpanel/pet_confirm_delete.html", {"pet": pet})
